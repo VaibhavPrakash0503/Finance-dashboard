@@ -45,3 +45,17 @@ def get_current_user(current_user: User = Depends(get_current_active_user)):
     Retrieve the profile information of the currently authenticated user.
     """
     return current_user
+
+
+@router.delete("/{user_id}", status_code=204)
+def delete_user(
+    user_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_role(UserRole.Admin)),
+):
+    """
+    Delete a user by ID (Admin only).
+
+    Provide the user ID to delete the corresponding user from the system.
+    """
+    UserService.delete_user(user_id=user_id, db=db)

@@ -51,3 +51,14 @@ class UserService:
                 status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
             )
         return user
+
+    @staticmethod
+    def delete_user(user_id: int, db: Session):
+        """Delete user by ID."""
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
+            )
+        db.delete(user)
+        db.commit()
