@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from app.database import init_db
-from app.utils.seed_admin import seed_admin
+from app.utils.seed import seed_admin
+from app.router import auth
 
 app = FastAPI(
     title="Finance Dashboard API",
@@ -17,6 +18,10 @@ def startup_event():
     print("📊 Database tables initialized")
     seed_admin()
     print("✅ Startup complete!")
+
+
+# Include routers
+app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
 
 
 @app.get("/")
