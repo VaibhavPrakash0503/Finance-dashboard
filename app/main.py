@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from app.database import init_db
 from app.utils.seed import seed_admin
-from app.router import auth
+from app.router import auth, users
 
 app = FastAPI(
     title="Finance Dashboard API",
@@ -22,6 +22,7 @@ def startup_event():
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["Authentication"])
+app.include_router(users.router, prefix="/api/users", tags=["Users"])
 
 
 @app.get("/")
