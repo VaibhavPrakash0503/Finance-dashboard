@@ -34,7 +34,7 @@ class RecordResponse(BaseModel):
     category: str
     description: str | None = None
     date: datetime
-    craeted_at: datetime
+    created_at: datetime
     user_id: int
 
 
