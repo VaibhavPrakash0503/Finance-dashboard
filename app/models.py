@@ -38,7 +38,7 @@ class User(Base):
     is_active = Column(Boolean, default=1)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    records = relationship("Record", back_populates="owner")
+    records = relationship("FinancialRecord", back_populates="owner")
 
 
 class FinancialRecord(Base):

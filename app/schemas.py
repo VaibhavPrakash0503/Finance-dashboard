@@ -50,6 +50,5 @@ class TokenResponse(BaseModel):
 
 
 class TokenData(BaseModel):
-    user_id: int
     email: EmailStr
     role: str
