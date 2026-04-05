@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from datetime import datetime
 
 
@@ -26,6 +26,18 @@ class RecordCreate(BaseModel):
     description: str | None = None
     category: str
     date: datetime
+    user_id: int | None = (
+        None  # Optional - Admin can specify user, otherwise defaults to creator
+    )
+
+
+class RecordUpdate(BaseModel):
+    amount: float | None = None
+    type: str | None = None
+    description: str | None = None
+    category: str | None = None
+    date: datetime | None = None
+    user_id: int | None = None  # Optional - Admin can reassign record to different user
 
 
 class RecordResponse(BaseModel):
@@ -37,6 +49,10 @@ class RecordResponse(BaseModel):
     date: datetime
     created_at: datetime
     user_id: int
+
+    class Config:
+        from_attributes = True
+        use_enum_values = True
 
 
 class LoginRequest(BaseModel):
