@@ -1,5 +1,6 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, Field
 from datetime import datetime
+from typing import ClassVar
 
 
 class UserCreate(BaseModel):
@@ -21,23 +22,158 @@ class UserResponse(BaseModel):
 
 
 class RecordCreate(BaseModel):
-    amount: float
+    amount: float = Field(..., gt=0, description="Amount must be positive")
     type: str
-    description: str | None = None
+    description: str | None = Field(None, max_length=500)
     category: str
     date: datetime
     user_id: int | None = (
         None  # Optional - Admin can specify user, otherwise defaults to creator
     )
 
+    # Predefined categories
+    INCOME_CATEGORIES: ClassVar[list[str]] = [
+        "Salary",
+        "Freelance",
+        "Investment",
+        "Gift",
+        "Other Income",
+    ]
+    EXPENSE_CATEGORIES: ClassVar[list[str]] = [
+        "Rent",
+        "Food",
+        "Transport",
+        "Entertainment",
+        "Healthcare",
+        "Shopping",
+        "Utilities",
+        "Education",
+        "Insurance",
+        "Other Expense",
+    ]
+    ALL_CATEGORIES: ClassVar[list[str]] = INCOME_CATEGORIES + EXPENSE_CATEGORIES
+
+    @field_validator("amount")
+    @classmethod
+    def validate_amount(cls, v):
+        if v <= 0:
+            raise ValueError("Amount must be greater than 0")
+        if v > 1_000_000_000:
+            raise ValueError("Amount cannot exceed 1 billion")
+        # Round to 2 decimal places
+        return round(v, 2)
+
+    @field_validator("date")
+    @classmethod
+    def validate_date(cls, v):
+        today = datetime.now()
+        # Convert datetime to date for comparison
+        record_date = v.date() if isinstance(v, datetime) else v
+
+        # No future dates
+        if record_date > today.date():
+            raise ValueError("Date cannot be in the future")
+
+        # Not too old (10 years)
+        ten_years_ago = today.replace(year=today.year - 10).date()
+        if record_date < ten_years_ago:
+            raise ValueError("Date cannot be more than 10 years in the past")
+
+        return v
+
+    @field_validator("category")
+    @classmethod
+    def validate_category(cls, v):
+        if v not in cls.ALL_CATEGORIES:
+            raise ValueError(
+                f"Invalid category. Must be one of: {', '.join(cls.ALL_CATEGORIES)}"
+            )
+        return v
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, v):
+        if v is not None and len(v.strip()) == 0:
+            raise ValueError("Description cannot be empty or whitespace only")
+        return v
+
 
 class RecordUpdate(BaseModel):
-    amount: float | None = None
+    amount: float | None = Field(None, gt=0, description="Amount must be positive")
     type: str | None = None
-    description: str | None = None
+    description: str | None = Field(None, max_length=500)
     category: str | None = None
     date: datetime | None = None
     user_id: int | None = None  # Optional - Admin can reassign record to different user
+
+    # Predefined categories (same as RecordCreate)
+    INCOME_CATEGORIES: ClassVar[list[str]] = [
+        "Salary",
+        "Freelance",
+        "Investment",
+        "Gift",
+        "Other Income",
+    ]
+    EXPENSE_CATEGORIES: ClassVar[list[str]] = [
+        "Rent",
+        "Food",
+        "Transport",
+        "Entertainment",
+        "Healthcare",
+        "Shopping",
+        "Utilities",
+        "Education",
+        "Insurance",
+        "Other Expense",
+    ]
+    ALL_CATEGORIES: ClassVar[list[str]] = INCOME_CATEGORIES + EXPENSE_CATEGORIES
+
+    @field_validator("amount")
+    @classmethod
+    def validate_amount(cls, v):
+        if v is not None:
+            if v <= 0:
+                raise ValueError("Amount must be greater than 0")
+            if v > 1_000_000_000:
+                raise ValueError("Amount cannot exceed 1 billion")
+            # Round to 2 decimal places
+            return round(v, 2)
+        return v
+
+    @field_validator("date")
+    @classmethod
+    def validate_date(cls, v):
+        if v is not None:
+            today = datetime.now()
+            # Convert datetime to date for comparison
+            record_date = v.date() if isinstance(v, datetime) else v
+
+            # No future dates
+            if record_date > today.date():
+                raise ValueError("Date cannot be in the future")
+
+            # Not too old (10 years)
+            ten_years_ago = today.replace(year=today.year - 10).date()
+            if record_date < ten_years_ago:
+                raise ValueError("Date cannot be more than 10 years in the past")
+
+        return v
+
+    @field_validator("category")
+    @classmethod
+    def validate_category(cls, v):
+        if v is not None and v not in cls.ALL_CATEGORIES:
+            raise ValueError(
+                f"Invalid category. Must be one of: {', '.join(cls.ALL_CATEGORIES)}"
+            )
+        return v
+
+    @field_validator("description")
+    @classmethod
+    def validate_description(cls, v):
+        if v is not None and len(v.strip()) == 0:
+            raise ValueError("Description cannot be empty or whitespace only")
+        return v
 
 
 class RecordResponse(BaseModel):
