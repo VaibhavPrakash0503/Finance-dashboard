@@ -68,3 +68,48 @@ class TokenResponse(BaseModel):
 class TokenData(BaseModel):
     email: EmailStr
     role: str
+
+
+# Dashboard Schemas
+class SummaryResponse(BaseModel):
+    """Overall financial summary"""
+
+    total_income: float
+    total_expenses: float
+    net_balance: float
+    record_count: int
+
+
+class CategoryTotal(BaseModel):
+    """Category-wise breakdown"""
+
+    category: str
+    total: float
+
+
+class CategoryTotalsResponse(BaseModel):
+    """Income and expense totals by category"""
+
+    income_by_category: dict[str, float]
+    expense_by_category: dict[str, float]
+
+
+class TrendDataPoint(BaseModel):
+    """Single data point for trends"""
+
+    period: str  # e.g., "2026-04" for monthly, "2026-W14" for weekly
+    income: float
+    expenses: float
+    net: float
+
+
+class TrendsResponse(BaseModel):
+    """Trends over time"""
+
+    trends: list[TrendDataPoint]
+
+
+class RecentActivityResponse(BaseModel):
+    """Recent financial records"""
+
+    recent_records: list[RecordResponse]

@@ -52,3 +52,20 @@ def require_role(required_role: UserRole):
         return current_user
 
     return role_checker
+
+
+def require_roles(allowed_roles: list[UserRole]):
+    """
+    Check if user has one of the allowed roles
+    Usage: Depends(require_roles([UserRole.Analyst, UserRole.Admin]))
+    """
+
+    def role_checker(current_user: User = Depends(get_current_active_user)) -> User:
+        if current_user.role not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Insufficient permissions",
+            )
+        return current_user
+
+    return role_checker
