@@ -4,10 +4,10 @@ from typing import ClassVar
 
 
 class UserCreate(BaseModel):
-    username: str
-    email: EmailStr
-    password: str
-    role: str
+    username: str = Field(..., min_length=3, max_length=50, examples=["john_doe"])
+    email: EmailStr = Field(..., examples=["john@example.com"])
+    password: str = Field(..., min_length=8, examples=["SecurePass123!"])
+    role: str = Field(..., examples=["Analyst"], description="Must be one of: Viewer, Analyst, Admin")
 
 
 class UserResponse(BaseModel):
@@ -22,13 +22,13 @@ class UserResponse(BaseModel):
 
 
 class RecordCreate(BaseModel):
-    amount: float = Field(..., gt=0, description="Amount must be positive")
-    type: str
-    description: str | None = Field(None, max_length=500)
-    category: str
-    date: datetime
-    user_id: int | None = (
-        None  # Optional - Admin can specify user, otherwise defaults to creator
+    amount: float = Field(..., gt=0, description="Amount must be positive", examples=[1500.00])
+    type: str = Field(..., examples=["INCOME"], description="Must be INCOME or EXPENSE")
+    description: str | None = Field(None, max_length=500, examples=["Monthly salary payment"])
+    category: str = Field(..., examples=["Salary"], description="Must be from predefined list")
+    date: datetime = Field(..., examples=["2026-04-01T00:00:00"])
+    user_id: int | None = Field(
+        None, examples=[2], description="Optional - Admin can specify user, otherwise defaults to creator"
     )
 
     # Predefined categories
@@ -192,8 +192,8 @@ class RecordResponse(BaseModel):
 
 
 class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
+    email: EmailStr = Field(..., examples=["admin@finance.com"])
+    password: str = Field(..., examples=["admin123"])
 
 
 class TokenResponse(BaseModel):
