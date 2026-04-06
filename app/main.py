@@ -1,13 +1,34 @@
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from app.database import init_db
 from app.utils.seed import seed_admin
 from app.router import auth, users, records, dashboard
+from app.utils.errors import (
+    FinanceAPIException,
+    finance_api_exception_handler,
+    http_exception_handler,
+    validation_exception_handler,
+    integrity_error_handler,
+    sqlalchemy_exception_handler,
+    generic_exception_handler,
+)
+from fastapi import HTTPException
 
 app = FastAPI(
     title="Finance Dashboard API",
     description="Backend API for finance dashboard with role-based access control",
     version="1.0.0",
 )
+
+
+# Register exception handlers
+app.add_exception_handler(FinanceAPIException, finance_api_exception_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(IntegrityError, integrity_error_handler)
+app.add_exception_handler(SQLAlchemyError, sqlalchemy_exception_handler)
+app.add_exception_handler(Exception, generic_exception_handler)
 
 
 # Create tables on startup
